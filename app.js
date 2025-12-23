@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const audioBtn = document.getElementById("playAudio");
   const statusEl = document.getElementById("status");
   const messagesEl = document.getElementById("messages");
+  const historyList = document.getElementById("historyList");
 
   let currentAudioSrc = null;
 
@@ -93,6 +94,32 @@ document.addEventListener("DOMContentLoaded", () => {
     }">${text}</div>`;
   }
 
+  // === Search History ===
+  function saveToHistory(word) {
+    let history = JSON.parse(localStorage.getItem("searchHistory")) || [];
+    if (!history.includes(word)) {
+      history.push(word);
+      localStorage.setItem("searchHistory", JSON.stringify(history));
+    }
+    renderHistory();
+  }
+
+  function renderHistory() {
+    let history = JSON.parse(localStorage.getItem("searchHistory")) || [];
+    historyList.innerHTML = "";
+    history.forEach((word) => {
+      const li = document.createElement("li");
+      const btn = document.createElement("button");
+      btn.textContent = word;
+      btn.addEventListener("click", () => {
+        input.value = word;
+        form.dispatchEvent(new Event("submit"));
+      });
+      li.appendChild(btn);
+      historyList.appendChild(li);
+    });
+  }
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     resetUI();
@@ -103,9 +130,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     const data = await fetchWordData(word);
     displayWordData(data);
+    if (data) saveToHistory(word);
   });
 
   audioBtn.addEventListener("click", () => {
     if (currentAudioSrc) new Audio(currentAudioSrc).play();
   });
+
+  // Render history on page load
+  renderHistory();
 });
