@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // --- DOM references ---
   const form = document.getElementById("searchForm");
   const input = document.getElementById("searchInput");
   const wordEl = document.getElementById("word");
@@ -10,9 +11,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const statusEl = document.getElementById("status");
   const messagesEl = document.getElementById("messages");
   const historyList = document.getElementById("historyList");
+  const clearHistoryBtn = document.getElementById("clearHistory");
 
   let currentAudioSrc = null;
 
+  // --- Fetch word data from API ---
   async function fetchWordData(word) {
     const url = `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(
       word
@@ -31,6 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // --- Reset UI before new search ---
   function resetUI() {
     wordEl.textContent = "";
     pronunciationEl.textContent = "";
@@ -42,6 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
     currentAudioSrc = null;
   }
 
+  // --- Display word data in DOM ---
   function displayWordData(data) {
     if (!data) {
       showMessage("No results found.", "error");
@@ -88,13 +93,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // --- Show message (error/info) ---
   function showMessage(text, type = "info") {
     messagesEl.innerHTML = `<div class="message ${
       type === "error" ? "error" : ""
     }">${text}</div>`;
   }
 
-  // === Search History ===
+  // --- Search history helpers ---
   function saveToHistory(word) {
     let history = JSON.parse(localStorage.getItem("searchHistory")) || [];
     if (!history.includes(word)) {
@@ -120,6 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // --- Event listeners ---
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     resetUI();
@@ -137,6 +144,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (currentAudioSrc) new Audio(currentAudioSrc).play();
   });
 
-  // Render history on page load
+  clearHistoryBtn.addEventListener("click", () => {
+    localStorage.removeItem("searchHistory");
+    renderHistory();
+    showMessage("Search history cleared.");
+  });
+
+  // --- Render history on page load ---
   renderHistory();
 });
