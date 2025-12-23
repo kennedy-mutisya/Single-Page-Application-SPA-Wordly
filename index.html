@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>Dictionary SPA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -10,41 +11,47 @@
       <h1>Dictionary Lookup</h1>
     </header>
 
-    <!-- Search Section -->
-    <section id="search-section">
-      <form id="searchForm" aria-label="Dictionary search form">
-        <label for="searchInput" class="visually-hidden">Enter a word</label>
-        <input
-          type="text"
-          id="searchInput"
-          placeholder="Enter a word..."
-          aria-required="true"
-          required
-        />
-        <button type="submit" aria-label="Search for word">Search</button>
-      </form>
-    </section>
+    <main>
+      <!-- Search Section -->
+      <section id="search-section">
+        <form id="searchForm" aria-label="Dictionary search form">
+          <label for="searchInput" class="visually-hidden">Enter a word</label>
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Enter a word..."
+            aria-required="true"
+            required
+          />
+          <button type="submit" id="searchBtn" aria-label="Search for word">
+            Search
+          </button>
+          <button
+            type="button"
+            id="playAudio"
+            style="display: none"
+            aria-label="Play pronunciation"
+          >
+            🔊 Play
+          </button>
+        </form>
+        <div id="status" aria-live="polite" class="hidden">Searching…</div>
+      </section>
 
-    <!-- Results Section -->
-    <section id="results" aria-live="polite">
-      <h2 id="word"></h2>
-      <p id="pronunciation"></p>
+      <!-- Results Section -->
+      <section id="results" aria-live="polite">
+        <h2 id="word"></h2>
+        <p id="pronunciation"></p>
+        <p id="origin"></p>
+        <div id="definitions"></div>
+        <div id="synonyms"></div>
+        <div id="messages"></div>
+      </section>
+    </main>
 
-      <!-- Audio playback -->
-      <button
-        id="playAudio"
-        style="display: none"
-        aria-label="Play pronunciation"
-      >
-        🔊 Play Pronunciation
-      </button>
-
-      <!-- Definitions -->
-      <div id="definitions"></div>
-
-      <!-- Synonyms -->
-      <div id="synonyms"></div>
-    </section>
+    <footer>
+      <p>Powered by Free Dictionary API</p>
+    </footer>
 
     <script src="app.js"></script>
   </body>

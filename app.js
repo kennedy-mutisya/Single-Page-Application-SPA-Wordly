@@ -3,91 +3,109 @@ document.addEventListener("DOMContentLoaded", () => {
   const input = document.getElementById("searchInput");
   const wordEl = document.getElementById("word");
   const pronunciationEl = document.getElementById("pronunciation");
+  const originEl = document.getElementById("origin");
   const definitionsEl = document.getElementById("definitions");
   const synonymsEl = document.getElementById("synonyms");
   const audioBtn = document.getElementById("playAudio");
+  const statusEl = document.getElementById("status");
+  const messagesEl = document.getElementById("messages");
 
-  // Fetch data from dictionary API
+  let currentAudioSrc = null;
+
   async function fetchWordData(word) {
-    const url = `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`;
+    const url = `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(
+      word
+    )}`;
     try {
+      statusEl.classList.remove("hidden");
       const response = await fetch(url);
       if (!response.ok) throw new Error("Word not found");
       const data = await response.json();
-      return data[0]; // First result
+      return data[0];
     } catch (error) {
       console.error(error);
       return null;
+    } finally {
+      statusEl.classList.add("hidden");
     }
   }
 
-  // Display data in DOM
+  function resetUI() {
+    wordEl.textContent = "";
+    pronunciationEl.textContent = "";
+    originEl.textContent = "";
+    definitionsEl.innerHTML = "";
+    synonymsEl.innerHTML = "";
+    audioBtn.style.display = "none";
+    messagesEl.innerHTML = "";
+    currentAudioSrc = null;
+  }
+
   function displayWordData(data) {
     if (!data) {
-      wordEl.textContent = "No results found.";
-      pronunciationEl.textContent = "";
-      definitionsEl.innerHTML = "";
-      synonymsEl.innerHTML = "";
-      audioBtn.style.display = "none";
+      showMessage("No results found.", "error");
       return;
     }
 
-    // Word
     wordEl.textContent = data.word;
-
-    // Pronunciation
-    const phoneticText = data.phonetics.find((p) => p.text)?.text;
     pronunciationEl.textContent =
-      phoneticText || "Pronunciation not available.";
+      data.phonetics.find((p) => p.text)?.text ||
+      "Pronunciation not available.";
+    originEl.textContent = data.origin ? `Origin: ${data.origin}` : "";
 
-    // Audio playback
     const audioSrc = data.phonetics.find((p) => p.audio)?.audio;
     if (audioSrc) {
+      currentAudioSrc = audioSrc.startsWith("//")
+        ? "https:" + audioSrc
+        : audioSrc;
       audioBtn.style.display = "inline-block";
-      audioBtn.onclick = () => new Audio(audioSrc).play();
-    } else {
-      audioBtn.style.display = "none";
     }
 
-    // Definitions
-    definitionsEl.innerHTML = "<h3>Definitions:</h3>";
+    definitionsEl.innerHTML = "<div class='section-title'>Definitions</div>";
     data.meanings.forEach((meaning) => {
       meaning.definitions.forEach((def) => {
         definitionsEl.innerHTML += `
-          <p><strong>${meaning.partOfSpeech}:</strong> ${def.definition} 
-          ${def.example ? `<em>(${def.example})</em>` : ""}</p>`;
+          <div class="definition">
+            <strong>${meaning.partOfSpeech}:</strong> ${def.definition}
+            ${def.example ? `<div class="example">“${def.example}”</div>` : ""}
+          </div>`;
       });
     });
 
-    // Synonyms
-    synonymsEl.innerHTML = "<h3>Synonyms:</h3>";
-    let synonymList = [];
-    data.meanings.forEach((meaning) => {
-      meaning.definitions.forEach((def) => {
-        if (def.synonyms && def.synonyms.length > 0) {
-          synonymList = synonymList.concat(def.synonyms);
-        }
-      });
-    });
-    synonymsEl.innerHTML +=
-      synonymList.length > 0
-        ? synonymList.join(", ")
-        : "No synonyms available.";
+    synonymsEl.innerHTML = "<div class='section-title'>Synonyms</div>";
+    const synonyms = [];
+    data.meanings.forEach((m) =>
+      m.definitions.forEach((d) => synonyms.push(...(d.synonyms || [])))
+    );
+    if (synonyms.length) {
+      synonymsEl.innerHTML += synonyms
+        .map((s) => `<span class="token">${s}</span>`)
+        .join("");
+    } else {
+      synonymsEl.innerHTML +=
+        "<div class='message'>No synonyms available.</div>";
+    }
   }
 
-  // Handle form submission
+  function showMessage(text, type = "info") {
+    messagesEl.innerHTML = `<div class="message ${
+      type === "error" ? "error" : ""
+    }">${text}</div>`;
+  }
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    resetUI();
     const word = input.value.trim();
     if (!word) {
-      wordEl.textContent = "Please enter a word.";
-      pronunciationEl.textContent = "";
-      definitionsEl.innerHTML = "";
-      synonymsEl.innerHTML = "";
-      audioBtn.style.display = "none";
+      showMessage("Please enter a word.", "error");
       return;
     }
     const data = await fetchWordData(word);
     displayWordData(data);
+  });
+
+  audioBtn.addEventListener("click", () => {
+    if (currentAudioSrc) new Audio(currentAudioSrc).play();
   });
 });
