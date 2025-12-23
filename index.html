@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Dictionary SPA</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Dictionary Lookup</h1>
+    </header>
+
+    <!-- Search Section -->
+    <section id="search-section">
+      <form id="searchForm" aria-label="Dictionary search form">
+        <label for="searchInput" class="visually-hidden">Enter a word</label>
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Enter a word..."
+          aria-required="true"
+          required
+        />
+        <button type="submit" aria-label="Search for word">Search</button>
+      </form>
+    </section>
+
+    <!-- Results Section -->
+    <section id="results" aria-live="polite">
+      <h2 id="word"></h2>
+      <p id="pronunciation"></p>
+
+      <!-- Audio playback -->
+      <button
+        id="playAudio"
+        style="display: none"
+        aria-label="Play pronunciation"
+      >
+        🔊 Play Pronunciation
+      </button>
+
+      <!-- Definitions -->
+      <div id="definitions"></div>
+
+      <!-- Synonyms -->
+      <div id="synonyms"></div>
+    </section>
+
+    <script src="app.js"></script>
+  </body>
+</html>
